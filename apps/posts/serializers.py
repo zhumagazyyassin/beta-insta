@@ -67,6 +67,7 @@ class CreatePostSerializer(serializers.ModelSerializer):
         media_data = validated_data.pop('media')
         post = Post.objects.create(**validated_data)
         for idx, m in enumerate(media_data):
+            m.pop('order', None)  # убираем order из данных если пришёл
             PostMedia.objects.create(post=post, order=idx, **m)
         return post
 
