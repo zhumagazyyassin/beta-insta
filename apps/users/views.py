@@ -124,3 +124,16 @@ class SuggestedUsersView(APIView):
             id__in=list(following_ids) + [request.user.id]
         ).order_by('?')[:10]
         return Response(UserMiniSerializer(suggested, many=True, context={'request': request}).data)
+# ... (твои существующие импорты)
+from rest_framework import generics
+
+# ... (твои существующие классы: RegisterView, LoginView и т.д.)
+
+class UserListView(generics.ListAPIView):
+    """
+    Представление для получения списка всех зарегистрированных пользователей.
+    Используется для отображения поиска или списка контактов в приложении.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserMiniSerializer
+    permission_classes = [permissions.IsAuthenticated]
