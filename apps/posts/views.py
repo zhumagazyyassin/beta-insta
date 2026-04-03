@@ -51,19 +51,15 @@ class ExploreFeedView(generics.ListAPIView):
         return {'request': self.request}
 
 
-class PostListCreateView(APIView):
-    def get(self, request, username):
-        user = get_object_or_404(User, username=username)
-        posts = Post.objects.filter(user=user, is_archived=False).prefetch_related('media')
-        serializer = PostSerializer(posts, many=True, context={'request': request})
-        return Response(serializer.data)
-
+class PostCreateView(APIView):
+    """POST /api/posts/ — создать пост"""
     def post(self, request):
         serializer = CreatePostSerializer(data=request.data)
         if serializer.is_valid():
             post = serializer.save(user=request.user)
             # Handle hashtags
-            tags = extract_hashtags(post.caption)
+            caption = post.caption or ''
+            tags = extract_hashtags(caption)
             for tag_name in tags:
                 hashtag, _ = Hashtag.objects.get_or_create(name=tag_name.lower())
                 hashtag.posts.add(post)
@@ -71,6 +67,15 @@ class PostListCreateView(APIView):
                 hashtag.save()
             return Response(PostSerializer(post, context={'request': request}).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PostListCreateView(APIView):
+    """GET /api/posts/user/<username>/ — посты пользователя"""
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+        posts = Post.objects.filter(user=user, is_archived=False).prefetch_related('media')
+        serializer = PostSerializer(posts, many=True, context={'request': request})
+        return Response(serializer.data)
 
 
 class PostDetailView(APIView):
@@ -93,7 +98,7 @@ class PostDetailView(APIView):
 
     def patch(self, request, pk):
         return self.put(request, pk)
-
+    
     def delete(self, request, pk):
         post = self.get_object(pk)
         if post.user != request.user:
@@ -190,8 +195,7 @@ class ArchivedPostsView(generics.ListAPIView):
 
     def get_serializer_context(self):
         return {'request': self.request}
-
-
+    
 class ArchivePostView(APIView):
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk, user=request.user)

@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
     path('feed/', views.FeedView.as_view(), name='feed'),
     path('explore/', views.ExploreFeedView.as_view(), name='explore'),
-    path('', views.PostListCreateView.as_view(), name='post-create'),
+    path('', views.PostCreateView.as_view(), name='post-create'),
     path('<uuid:pk>/', views.PostDetailView.as_view(), name='post-detail'),
     path('user/<str:username>/', views.PostListCreateView.as_view(), name='user-posts'),
     path('saved/', views.SavedPostsView.as_view(), name='saved-posts'),
