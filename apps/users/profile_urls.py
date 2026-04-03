@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Этот путь исправляет ошибку 404 при GET запросе на /api/users/
+    # Этот путь должен быть ПЕРВЫМ. Он отвечает за /api/users/
     path('', views.UserListView.as_view(), name='user-list'), 
     
     path('suggested/', views.SuggestedUsersView.as_view(), name='suggested-users'),
